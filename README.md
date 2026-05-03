@@ -87,13 +87,15 @@ Softmax → class probabilities
 
 ## Results
 
-Evaluated on a held-out test set (15% of data, stratified split).
+> **🚧 Training in progress.** The numbers below are design targets from the project plan. This section will be updated with real results after the Day 5–6 training and evaluation runs.
 
-| Metric | Score |
-|--------|------:|
-| Balanced accuracy | **0.81** |
-| Macro F1-score | **0.76** |
-| Weighted F1-score | **0.88** |
+Evaluated on a held-out test set (15% of data, stratified and grouped by `lesion_id` — 70/15/15 split).
+
+| Metric | Target |
+|--------|-------:|
+| Balanced accuracy | **~0.81** |
+| Macro F1-score | **~0.76** |
+| Weighted F1-score | **~0.88** |
 
 > Raw accuracy is not reported as the primary metric — the class imbalance makes it misleading (a model predicting only `nv` would achieve ~67% accuracy).
 
@@ -105,13 +107,13 @@ Evaluated on a held-out test set (15% of data, stratified split).
 
 | Class | Precision | Recall | F1 |
 |-------|----------:|-------:|---:|
-| nv | 0.94 | 0.97 | 0.95 |
-| mel | 0.72 | 0.68 | 0.70 |
-| bkl | 0.71 | 0.74 | 0.72 |
-| bcc | 0.82 | 0.80 | 0.81 |
-| akiec | 0.70 | 0.67 | 0.68 |
-| vasc | 0.85 | 0.88 | 0.86 |
-| df | 0.65 | 0.62 | 0.63 |
+| nv | — | — | — |
+| mel | — | — | — |
+| bkl | — | — | — |
+| bcc | — | — | — |
+| akiec | — | — | — |
+| vasc | — | — | — |
+| df | — | — | — |
 
 ---
 
@@ -134,50 +136,59 @@ Key observations:
 
 ### Requirements
 
-```bash
-python >= 3.10
-torch >= 2.0
-torchvision
-timm
-albumentations
-gradio
-scikit-learn
-pandas
-pytorch-grad-cam
-huggingface_hub
-```
+- Python ≥ 3.10
+- All dependencies are pinned in `pyproject.toml` / `uv.lock`. Key packages: torch ≥ 2.0, timm, albumentations, gradio, pytorch-grad-cam, scikit-learn, pandas, tensorboard, huggingface_hub.
 
 ### Installation
 
+This project uses [`uv`](https://docs.astral.sh/uv/) for dependency management.
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/skin-lesion-classifier
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh   # macOS/Linux
+# powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
+
+git clone https://github.com/Hans-Randy/skin-lesion-classifier
 cd skin-lesion-classifier
-pip install -r requirements.txt
+uv sync          # creates .venv and installs all pinned deps
 ```
+
+> **GPU note:** the lock file resolves the CPU wheel of torch by default. For CUDA training swap to the CUDA index before `uv sync` — see the [uv PyTorch guide](https://docs.astral.sh/uv/guides/integration/pytorch/).
 
 ### Download the dataset
 
 ```bash
-kaggle datasets download kmader/skin-lesion-analysis-toward-melanoma-detection
-unzip skin-lesion-analysis-toward-melanoma-detection.zip -d data/
+# macOS / Linux
+bash scripts/download_data.sh
+
+# Windows (PowerShell)
+.\scripts\download_data.ps1
 ```
+
+Requires a [Kaggle API token](https://www.kaggle.com/docs/api) at `~/.kaggle/kaggle.json`.
 
 ### Train
 
 ```bash
-python train.py --epochs 30 --batch-size 32 --lr 1e-5
+uv run python train.py --epochs 30 --batch-size 32 --lr 1e-5
+```
+
+Monitor training in TensorBoard:
+
+```bash
+uv run tensorboard --logdir runs/
 ```
 
 ### Evaluate
 
 ```bash
-python evaluate.py --checkpoint checkpoints/best_model.pth
+uv run python evaluate.py --checkpoint checkpoints/best_model.pth
 ```
 
 ### Run the Gradio demo locally
 
 ```bash
-python app.py
+uv run python app.py
 ```
 
 ---
@@ -186,17 +197,24 @@ python app.py
 
 ```
 skin-lesion-classifier/
-├── data/                   # HAM10000 images and metadata CSV
-├── checkpoints/            # Saved model weights
+├── data/                   # HAM10000 images and metadata CSV (gitignored)
+├── checkpoints/            # Saved model weights (gitignored)
 ├── assets/                 # README images (confusion matrix, Grad-CAM)
+├── runs/                   # TensorBoard logs (gitignored)
+├── splits/                 # Cached train/val/test CSV splits (seed=42)
+├── scripts/
+│   ├── download_data.sh    # Kaggle download helper (macOS/Linux)
+│   └── download_data.ps1   # Kaggle download helper (Windows)
+├── docs/                   # Architecture decision records
 ├── train.py                # Training script
 ├── evaluate.py             # Evaluation + metrics
 ├── dataset.py              # Custom PyTorch Dataset class
-├── model.py                # Model definition
+├── model.py                # Model definition + canonical CLASSES constant
 ├── transforms.py           # Augmentation pipeline
 ├── gradcam.py              # Grad-CAM visualization utilities
 ├── app.py                  # Gradio demo app
-├── requirements.txt
+├── pyproject.toml          # Project metadata and dependencies
+├── uv.lock                 # Pinned dependency lockfile
 └── README.md
 ```
 
