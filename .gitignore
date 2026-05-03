@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+# uv.lock is checked in for reproducibility
+
+# Data and artifacts (too large / not source)
+data/
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+
+# Training logs
+runs/
+wandb/
+lightning_logs/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
