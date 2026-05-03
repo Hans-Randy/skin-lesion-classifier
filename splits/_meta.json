@@ -1,0 +1,10 @@
+{
+  "seed": 42,
+  "n_splits": 7,
+  "test_fold": 0,
+  "val_fold": 1,
+  "ham_metadata_md5": "70bb67f71bd23dde0bd2eda4bdcc98e5",
+  "train_rows": 7153,
+  "val_rows": 1431,
+  "test_rows": 1431
+}
