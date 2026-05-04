@@ -4,14 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-**Day 1 complete (scaffold).** The following exist on `feature/build-model`:
-- `pyproject.toml` + `uv.lock` — all deps pinned (torch 2.11.0, timm 1.0.26, albumentations 2.0.8, gradio 6.14.0, grad-cam 1.5.5, scikit-learn 1.8.0, tensorboard 2.20.0)
-- Module stubs (importable, not yet implemented): `dataset.py`, `model.py`, `transforms.py`, `train.py`, `evaluate.py`, `gradcam.py`, `app.py`
-- `model.py` already exports canonical `CLASSES`, `CLASS_TO_IDX`, `NUM_CLASSES`
-- Directories: `data/`, `checkpoints/`, `assets/`, `runs/`, `splits/`, `scripts/`, `docs/`
-- Dataset download helpers: `scripts/download_data.sh` (macOS/Linux), `scripts/download_data.ps1` (Windows)
+**Days 1–10 complete.** All modules are implemented and on `main`.
 
-**Days 2–10** implement the modules. Always verify which files exist before assuming — use a tool.
+| File | Status | Notes |
+|---|---|---|
+| `pyproject.toml` / `uv.lock` | Done | torch 2.11.0, timm 1.0.26, albumentations 2.0.8, gradio 6.14.0, grad-cam 1.5.5 |
+| `dataset.py` | Done | `HAMDataset`, two-folder image lookup, `class_counts` property |
+| `transforms.py` | Done | `get_train_transform()`, `get_eval_transform()` |
+| `model.py` | Done | `HAMClassifier`, `build_model()`, `freeze_backbone()`, `save_checkpoint()`, `load_checkpoint()` |
+| `train.py` | Done | Two-stage loop, `WeightedRandomSampler`, AMP, TensorBoard, early stopping (patience=7) |
+| `evaluate.py` | Done | Balanced acc, macro/weighted F1, confusion matrix PNG, per-class CSV |
+| `gradcam.py` | Done | `generate_cam()` targeting `backbone.bn2`, triptych CLI |
+| `app.py` | Done | Gradio Blocks, disclaimer in header+title+result, 10 MB upload cap |
+| `scripts/make_splits.py` | Done | StratifiedGroupKFold(7), seed=42, zero-overlap assertion |
+| `scripts/sanity_check.py` | Done | Load checkpoint, shape, prob-sum, collapse detection |
+| `scripts/smoke_test.py` | Done | 1 epoch, 200-sample subset, CPU |
+| `requirements.txt` | Done | HF Spaces compatible, exported via `uv export --no-hashes` |
+| `splits/{train,val,test}.csv` | Done | 7153/1431/1431 rows, all 7 classes in val+test |
+| `docs/splits.md` | Done | Split rationale and cache contract |
+
+**Remaining:** run the full 30-epoch training (`uv run python train.py --epochs 30 ...`), then run `evaluate.py` and `gradcam.py` with the resulting checkpoint to populate `assets/`. Update README results table with real numbers.
 
 ## Project goal
 
